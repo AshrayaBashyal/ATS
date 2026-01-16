@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
-
 class PipelinesConfig(AppConfig):
-    name = 'pipelines'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "src.apps.pipelines"
