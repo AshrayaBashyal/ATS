@@ -52,6 +52,10 @@ INSTALLED_APPS = [
 
     # Shared
     "src.apps.common.apps.CommonConfig",
+
+    # OTP & Email apps
+    "src.apps.otp.apps.OtpConfig",
+    "src.apps.emails.apps.EmailsConfig",
 ]
 
 MIDDLEWARE = [
