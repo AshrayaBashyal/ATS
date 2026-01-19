@@ -151,12 +151,20 @@ class ResetPasswordView(generics.GenericAPIView):
 
         user = get_object_or_404(User, email=email)
 
+        # Ensure the user has an OTP secret
+        if not getattr(user, "otp_secret", None):
+            return Response(
+                {"error": "No OTP found. Request a new OTP."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Verify the OTP
         if not verify_user_otp(user, otp, purpose="reset"):
             return Response(
                 {"error": "Invalid or expired OTP."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         user.set_password(new_password)
         user.save()
         clear_user_otp(user)
