@@ -105,3 +105,34 @@ class LoginView(generics.GenericAPIView):
                 "access": str(refresh.access_token),
             }
         )
+    
+
+class ForgotPasswordView(generics.GenericAPIView):
+    serializer_class = ForgotPasswordSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Prevent email enumeration
+            return Response(
+                {"msg": "If the email exists, an OTP was sent."},
+                status=status.HTTP_200_OK,
+            )
+
+        if not user.is_verified:
+            return Response(
+                {"error": "Email not verified"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        send_otp_email_task.delay(user.id, purpose="reset")
+
+        return Response({"msg": "OTP sent to your email for password reset."})
+
