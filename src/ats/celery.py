@@ -1,7 +1,7 @@
 import os
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'src.ats.settings.dev')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ats.settings.dev')
 
 app = Celery('ats')
 app.config_from_object('django.conf:settings', namespace='CELERY')

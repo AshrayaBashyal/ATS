@@ -1,5 +1,5 @@
 from celery import shared_task
-from src.apps.emails.services import send_email
+from apps.emails.services import send_email
 from django.contrib.auth import get_user_model
 from .services import generate_user_otp
 

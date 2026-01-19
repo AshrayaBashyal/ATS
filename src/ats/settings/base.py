@@ -6,14 +6,17 @@ from dotenv import load_dotenv
 # Paths & environment
 # --------------------------------------------------
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env")
+# Current file: src/ats/settings/base.py
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # points to ATS_Backend/
+
+dotenv_path = BASE_DIR / ".env"  # .env is directly in ATS_Backend
+load_dotenv(dotenv_path)
 
 # --------------------------------------------------
 # Core settings
 # --------------------------------------------------
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+# SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
@@ -38,25 +41,25 @@ INSTALLED_APPS = [
     "corsheaders",
 
     # Core ATS apps
-    "src.apps.users.apps.UsersConfig",
-    "src.apps.companies.apps.CompaniesConfig",
-    "src.apps.jobs.apps.JobsConfig",
-    "src.apps.applications.apps.ApplicationsConfig",
+    "apps.users.apps.UsersConfig",
+    "apps.companies.apps.CompaniesConfig",
+    "apps.jobs.apps.JobsConfig",
+    "apps.applications.apps.ApplicationsConfig",
 
     # Workflow / domain apps
-    "src.apps.pipelines.apps.PipelinesConfig",
-    "src.apps.offers.apps.OffersConfig",
+    "apps.pipelines.apps.PipelinesConfig",
+    "apps.offers.apps.OffersConfig",
 
     # Cross-cutting apps
-    "src.apps.notifications.apps.NotificationsConfig",
-    "src.apps.audit.apps.AuditConfig",
+    "apps.notifications.apps.NotificationsConfig",
+    "apps.audit.apps.AuditConfig",
 
     # Shared
-    "src.apps.common.apps.CommonConfig",
+    "apps.common.apps.CommonConfig",
 
     # OTP & Email apps
-    "src.apps.otp.apps.OtpConfig",
-    "src.apps.emails.apps.EmailsConfig",
+    "apps.otp.apps.OtpConfig",
+    "apps.emails.apps.EmailsConfig",
 ]
 
 MIDDLEWARE = [
