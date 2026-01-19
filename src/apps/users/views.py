@@ -45,3 +45,29 @@ class UserListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = None  # Add pagination later
 
+
+class VerifyEmailView(generics.GenericAPIView):
+    serializer_class = OTPVerifySerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        otp = serializer.validated_data["otp"]
+
+        user = get_object_or_404(User, email=email)
+
+        if not verify_user_otp(user, otp, purpose="verify"):
+            return Response(
+                {"error": "Invalid or expired OTP."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.is_verified = True
+        user.save(update_fields=["is_verified"])
+        clear_user_otp(user)
+
+        return Response({"msg": "Email verified successfully."})
+
