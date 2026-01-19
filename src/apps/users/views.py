@@ -136,3 +136,29 @@ class ForgotPasswordView(generics.GenericAPIView):
 
         return Response({"msg": "OTP sent to your email for password reset."})
 
+
+class ResetPasswordView(generics.GenericAPIView):
+    serializer_class = ResetPasswordSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        otp = serializer.validated_data["otp"]
+        new_password = serializer.validated_data["password"]
+
+        user = get_object_or_404(User, email=email)
+
+        if not verify_user_otp(user, otp, purpose="reset"):
+            return Response(
+                {"error": "Invalid or expired OTP."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save()
+        clear_user_otp(user)
+
+        return Response({"msg": "Password reset successfully."})
