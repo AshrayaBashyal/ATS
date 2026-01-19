@@ -16,7 +16,7 @@ load_dotenv(dotenv_path)
 # Core settings
 # --------------------------------------------------
 
-# SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
