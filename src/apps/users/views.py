@@ -37,3 +37,11 @@ class RegisterView(generics.CreateAPIView):
             {"msg": "User registered. Check your email for OTP verification."},
             status=status.HTTP_201_CREATED,
         )
+    
+
+class UserListView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+    pagination_class = None  # Add pagination later
+
