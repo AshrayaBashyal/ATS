@@ -12,3 +12,11 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = ["id", "name", "description", "owner_email", "created_at", "updated_at"]
 
+
+class CompanyMemberSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = CompanyMember
+        fields = ["id", "user", "user_email", "role", "joined_at"]
+        read_only_fields = ["joined_at"]
