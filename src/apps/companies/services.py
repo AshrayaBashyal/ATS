@@ -14,7 +14,7 @@ class CompanyService:
         CompanyMember.objects.create(user=owner, company=company, role=CompanyMember.ADMIN)
         return company
         
-        
+
     @staticmethod
     def add_member(company, user, role, acting_user):
         # Only admins can add members
@@ -25,3 +25,22 @@ class CompanyService:
             member.role = role
             member.save()
         return member        
+    
+
+    @staticmethod
+    def send_invite(company, email, role, invited_by):
+        # Only admins can invite
+        if not CompanyMember.objects.filter(company=company, user=invited_by, role=CompanyMember.ADMIN).exists():
+            raise PermissionDenied("Only admins can invite members")
+        invite, created = CompanyInvite.objects.get_or_create(
+            company=company, email=email,
+            defaults={"role": role, "invited_by": invited_by}
+        )
+        if not created:
+            if invite.status in [CompanyInvite.PENDING]:
+                raise ValidationError("Invite already pending")
+            invite.status = CompanyInvite.PENDING
+            invite.role = role
+            invite.invited_by = invited_by
+            invite.save()
+        return invite    
