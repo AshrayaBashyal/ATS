@@ -1,3 +1,63 @@
+from rest_framework import serializers
+from apps.companies.models import Company, Membership, Invite
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ["id", "name", "description", "created_at"]
+
+
+class MembershipSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = Membership
+        fields = ["id", "user_email", "role", "joined_at"]
+
+
+class InviteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invite
+        fields = ["id", "email", "role", "status", "created_at"]
+
+
+class CompanyCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    description = serializers.CharField(allow_blank=True)
+
+
+class SendInviteSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    role = serializers.ChoiceField(choices=Membership.Role.choices)
+
+
+class ChangeRoleSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=Membership.Role.choices)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # from rest_framework import serializers
 # from django.contrib.auth import get_user_model
 # from ..models import Company, CompanyInvite, CompanyMember
