@@ -12,6 +12,7 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     UserSerializer,
+    ResendOTPSerializer
 )
 from .models import User
 
@@ -170,3 +171,27 @@ class ResetPasswordView(generics.GenericAPIView):
         clear_user_otp(user)
 
         return Response({"msg": "Password reset successfully."})
+
+
+class ResendOTPView(generics.GenericAPIView):
+    serializer_class = ResendOTPSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Avoid email enumeration
+            return Response({"msg": "If the email exists, OTP was sent."}, status=status.HTTP_200_OK)
+
+        if user.is_verified:
+            return Response({"msg": "Email is already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Send verification OTP again
+        send_otp_email_task.delay(user.id, purpose="verify")
+
+        return Response({"msg": "OTP resent to your email."}, status=status.HTTP_200_OK)
