@@ -60,6 +60,9 @@ INSTALLED_APPS = [
     # OTP & Email apps
     "apps.otp.apps.OtpConfig",
     "apps.emails.apps.EmailsConfig",
+
+    #UI
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -160,6 +163,9 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_SCHEMA_CLASS": (
+        "drf_spectacular.openapi.AutoSchema",
     ),
 }
 
