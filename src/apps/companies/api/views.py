@@ -171,7 +171,7 @@ class MyInvitesView(APIView):
 
 
 class CancelInviteView(APIView):
-    permission_classes = [IsCompanyAdmin]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, invite_id):
         invite = get_object_or_404(Invite, id=invite_id)
