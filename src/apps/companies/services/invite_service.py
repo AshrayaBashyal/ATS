@@ -30,24 +30,27 @@ def send_invite(*, email, company, role, invited_by):
 
 
 def accept_invite(*, invite, user):
-    """
-    User accepts invite.
-    Creates membership.
-    """
 
     if invite.status != Invite.Status.PENDING:
         raise ValidationError("Invite is no longer valid.")
 
-    membership, created = Membership.objects.get_or_create(
+    if invite.email.lower() != user.email.lower():
+        raise ValidationError("This invite is not for your account.")
+
+    if Membership.objects.filter(user=user, company=invite.company).exists():
+        raise ValidationError("Already a member of this company.")
+
+    membership = Membership.objects.create(
         user=user,
         company=invite.company,
-        defaults={"role": invite.role}
+        role=invite.role
     )
 
     invite.status = Invite.Status.ACCEPTED
     invite.save(update_fields=["status"])
 
     return membership
+
 
 
 def reject_invite(*, invite):
