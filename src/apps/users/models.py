@@ -91,6 +91,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     date_joined = models.DateTimeField(default=timezone.now)
 
+    # bio = models.TextField(blank=True, null=True)
+    # avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = "email"

@@ -12,7 +12,8 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
     UserSerializer,
-    ResendOTPSerializer
+    ResendOTPSerializer,
+    ProfileSerializer
 )
 from .models import User
 
@@ -195,3 +196,12 @@ class ResendOTPView(generics.GenericAPIView):
         send_otp_email_task.delay(user.id, purpose="verify")
 
         return Response({"msg": "OTP resent to your email."}, status=status.HTTP_200_OK)
+
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Return the currently logged-in user
+        return self.request.user
