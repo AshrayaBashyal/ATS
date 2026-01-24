@@ -54,6 +54,9 @@ class MyInviteSerializer(serializers.ModelSerializer):
         ]
 
     def get_invited_by(self, obj):
+        """
+        Return full info for the user who sent the invite
+        """
         user = obj.invited_by
         if not user:
             return None
@@ -67,15 +70,23 @@ class MyInviteSerializer(serializers.ModelSerializer):
         }
 
     def get_recipient(self, obj):
-        company = obj.company
-        if not company:
-            return None
-        return {
-            "id": company.id,
-            "name": company.name,
-            "description": company.description,
-        }
-
+        """
+        Return full info for the invited user.
+        If user exists in DB, return id + email + full_name.
+        Otherwise fallback to email only (common for pending invites).
+        """
+        if hasattr(obj, "recipient_user") and obj.recipient_user:
+            user = obj.recipient_user
+            full_name = " ".join(
+                filter(None, [user.first_name, getattr(user, "middle_name", ""), user.last_name])
+            )
+            return {
+                "id": user.id,
+                "email": user.email,
+                "full_name": full_name or None,
+            }
+        # fallback: only email stored in Invite object
+        return {"email": obj.email}
 
 
 
