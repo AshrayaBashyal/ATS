@@ -2,12 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 
 from apps.companies.models import Company, Membership, Invite
 from apps.companies.services.company_service import create_company
 from apps.companies.services.invite_service import (
-    send_invite, accept_invite, reject_invite, cancel_invite, list_user_invites
+    send_invite, accept_invite, reject_invite, cancel_invite, list_user_invites, list_sent_invites
 )
 from apps.companies.services.membership_service import (
     change_member_role, remove_member
@@ -107,10 +108,32 @@ class RemoveMemberView(APIView):
 
 
 class MyInvitesView(APIView):
-    def get(self, request):
-        invites = list_user_invites(user=request.user)
-        return Response(MyInviteSerializer(invites, many=True).data)
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user = request.user
+
+        # # Invites I received
+        # received_invites = Invite.objects.filter(
+        #     email__iexact=user.email,
+        #     status=Invite.Status.PENDING
+        # ).select_related("company", "invited_by")
+
+        # # Invites I sent
+        # sent_invites = Invite.objects.filter(
+        #     invited_by=user
+        # ).select_related("company", "invited_by")
+
+        # Use service functions
+        received_invites = list_user_invites(user=user)
+        sent_invites = list_sent_invites(user=user)
+
+        data = {
+            "received": MyInviteSerializer(received_invites, many=True).data,
+            "sent": MyInviteSerializer(sent_invites, many=True).data
+        }
+
+        return Response(data)
 
 class CancelInviteView(APIView):
     permission_classes = [IsCompanyAdmin]

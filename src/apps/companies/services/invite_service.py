@@ -91,7 +91,6 @@ def cancel_invite(*, invite, cancelled_by):
     invite.save(update_fields=["status"])
 
 
-
 def list_user_invites(*, user):
     """
     Returns all pending invites for the logged-in user.
@@ -100,3 +99,13 @@ def list_user_invites(*, user):
         email__iexact=user.email,
         status=Invite.Status.PENDING
     ).select_related("company")    
+
+
+def list_sent_invites(*, user):
+    """
+    Returns all pending invites sent by this user.
+    """
+    return Invite.objects.filter(
+        invited_by=user,
+        status=Invite.Status.PENDING
+    ).select_related("company")
