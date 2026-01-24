@@ -67,15 +67,15 @@ class SendInviteView(GenericAPIView):
 
 class AcceptInviteView(APIView):
     def post(self, request, invite_id):
-        invite = get_object_or_404(Invite, id=invite_id, email=request.user.email)
-        membership = accept_invite(invite=invite, user=request.user)
+        invite = get_object_or_404(Invite, id=invite_id)
+        accept_invite(invite=invite, user=request.user)
         return Response({"detail": "Joined company"})
 
 
 class RejectInviteView(APIView):
     def post(self, request, invite_id):
-        invite = get_object_or_404(Invite, id=invite_id, email=request.user.email)
-        reject_invite(invite=invite)
+        invite = get_object_or_404(Invite, id=invite_id)
+        reject_invite(invite=invite, user=request.user)
         return Response({"detail": "Invite rejected"})
 
 

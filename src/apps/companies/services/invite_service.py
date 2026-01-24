@@ -55,7 +55,17 @@ def accept_invite(*, invite, user):
 
 
 
-def reject_invite(*, invite):
+def reject_invite(*, invite, user):
+    """
+    User rejects invite.
+    """
+
+    if invite.status != Invite.Status.PENDING:
+        raise ValidationError("Invite already processed.")
+
+    if invite.email.lower() != user.email.lower():
+        raise ValidationError("This invite is not assigned to your account.")
+
     invite.status = Invite.Status.REJECTED
     invite.save(update_fields=["status"])
 
