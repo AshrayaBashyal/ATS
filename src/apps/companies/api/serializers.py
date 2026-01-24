@@ -38,16 +38,43 @@ class ChangeRoleSerializer(serializers.Serializer):
 
 class MyInviteSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source="company.name", read_only=True)
+    invited_by = serializers.SerializerMethodField()
+    recipient = serializers.SerializerMethodField()
 
     class Meta:
         model = Invite
-        fields = ["id", "company_name", "role", "status", "created_at"]
+        fields = [
+            "id",
+            "company_name",
+            "role",
+            "status",
+            "created_at",
+            "invited_by",
+            "recipient",
+        ]
 
+    def get_invited_by(self, obj):
+        user = obj.invited_by
+        if not user:
+            return None
+        full_name = " ".join(
+            filter(None, [user.first_name, getattr(user, "middle_name", ""), user.last_name])
+        )
+        return {
+            "id": user.id,
+            "email": user.email,
+            "full_name": full_name or None,
+        }
 
-
-
-
-
+    def get_recipient(self, obj):
+        company = obj.company
+        if not company:
+            return None
+        return {
+            "id": company.id,
+            "name": company.name,
+            "description": company.description,
+        }
 
 
 

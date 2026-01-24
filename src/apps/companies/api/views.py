@@ -107,26 +107,52 @@ class RemoveMemberView(APIView):
         return Response(status=204)
 
 
+# class MyInvitesView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         user = request.user
+
+#         # # Invites I received
+#         # received_invites = Invite.objects.filter(
+#         #     email__iexact=user.email,
+#         #     status=Invite.Status.PENDING
+#         # ).select_related("company", "invited_by")
+
+#         # # Invites I sent
+#         # sent_invites = Invite.objects.filter(
+#         #     invited_by=user
+#         # ).select_related("company", "invited_by")
+
+#         # Use service functions
+#         received_invites = list_user_invites(user=user)
+#         sent_invites = list_sent_invites(user=user)
+
+#         data = {
+#             "received": MyInviteSerializer(received_invites, many=True).data,
+#             "sent": MyInviteSerializer(sent_invites, many=True).data
+#         }
+
+#         return Response(data)
+
+
+
 class MyInvitesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
 
-        # # Invites I received
-        # received_invites = Invite.objects.filter(
-        #     email__iexact=user.email,
-        #     status=Invite.Status.PENDING
-        # ).select_related("company", "invited_by")
+        # Invites received (pending)
+        received_invites = Invite.objects.filter(
+            email__iexact=user.email,
+            status=Invite.Status.PENDING
+        ).select_related("company", "invited_by")
 
-        # # Invites I sent
-        # sent_invites = Invite.objects.filter(
-        #     invited_by=user
-        # ).select_related("company", "invited_by")
-
-        # Use service functions
-        received_invites = list_user_invites(user=user)
-        sent_invites = list_sent_invites(user=user)
+        # Invites sent by this user
+        sent_invites = Invite.objects.filter(
+            invited_by=user
+        ).select_related("company", "invited_by")
 
         data = {
             "received": MyInviteSerializer(received_invites, many=True).data,
@@ -134,6 +160,7 @@ class MyInvitesView(APIView):
         }
 
         return Response(data)
+
 
 class CancelInviteView(APIView):
     permission_classes = [IsCompanyAdmin]
