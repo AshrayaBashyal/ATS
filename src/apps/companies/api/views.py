@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -16,9 +17,11 @@ from .serializers import *
 from .permissions import IsCompanyAdmin
 
 
-class CompanyCreateView(APIView):
+class CompanyCreateView(GenericAPIView):
+    serializer_class = CompanyCreateSerializer
+
     def post(self, request):
-        serializer = CompanyCreateSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         company = create_company(
@@ -42,11 +45,12 @@ class CompanyMembersView(APIView):
         return Response(MembershipSerializer(members, many=True).data)
 
 
-class SendInviteView(APIView):
+class SendInviteView(GenericAPIView):
+    serializer_class = SendInviteSerializer
     permission_classes = [IsCompanyAdmin]
 
     def post(self, request, company_id):
-        serializer = SendInviteSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         company = get_object_or_404(Company, id=company_id)
@@ -58,7 +62,7 @@ class SendInviteView(APIView):
             invited_by=request.user
         )
 
-        return Response(InviteSerializer(invite).data)
+        return Response(InviteSerializer(invite).data, status=201)
 
 
 class AcceptInviteView(APIView):
@@ -75,12 +79,13 @@ class RejectInviteView(APIView):
         return Response({"detail": "Invite rejected"})
 
 
-class ChangeRoleView(APIView):
+class ChangeRoleView(GenericAPIView):
+    serializer_class = ChangeRoleSerializer
     permission_classes = [IsCompanyAdmin]
 
     def post(self, request, membership_id):
         membership = get_object_or_404(Membership, id=membership_id)
-        serializer = ChangeRoleSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         change_member_role(
