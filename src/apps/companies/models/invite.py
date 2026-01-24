@@ -41,7 +41,7 @@ class Invite(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        unique_together = ("email", "company", "status")
+        unique_together = ("email", "company")
 
     def __str__(self):
         return f"{self.email} invited to {self.company.name} as {self.role}"
