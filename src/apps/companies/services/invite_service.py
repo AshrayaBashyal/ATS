@@ -11,6 +11,8 @@ def send_invite(*, email, company, role, invited_by):
     Send invite to a user.
     Only admins should be allowed (checked in view layer).
     """
+    if Membership.objects.filter(user__email=email, company=company).exists():
+        raise ValidationError("User already in company.")
 
     if Invite.objects.filter(
         email=email,
