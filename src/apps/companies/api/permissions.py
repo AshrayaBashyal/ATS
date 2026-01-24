@@ -16,7 +16,6 @@ class IsCompanyAdmin(BasePermission):
             ).exists()
 
         if membership_id:
-            from apps.companies.models import Membership
             membership = Membership.objects.filter(id=membership_id).first()
             if not membership:
                 return False
