@@ -70,9 +70,33 @@ def reject_invite(*, invite, user):
     invite.save(update_fields=["status"])
 
 
-def cancel_invite(*, invite):
+def cancel_invite(*, invite, cancelled_by):
+    """
+    Admin cancels an invite.
+    """
+
     if invite.status != Invite.Status.PENDING:
         raise ValidationError("Only pending invites can be cancelled.")
 
+    is_admin = Membership.objects.filter(
+        company=invite.company,
+        user=cancelled_by,
+        role=Membership.Role.ADMIN
+    ).exists()
+
+    if not is_admin:
+        raise ValidationError("Only company admins can cancel invites.")
+
     invite.status = Invite.Status.CANCELLED
     invite.save(update_fields=["status"])
+
+
+
+def list_user_invites(*, user):
+    """
+    Returns all pending invites for the logged-in user.
+    """
+    return Invite.objects.filter(
+        email__iexact=user.email,
+        status=Invite.Status.PENDING
+    ).select_related("company")    

@@ -10,4 +10,6 @@ urlpatterns = [
     path("invite/<int:invite_id>/reject/", RejectInviteView.as_view()),
     path("membership/<int:membership_id>/role/", ChangeRoleView.as_view()),
     path("membership/<int:membership_id>/remove/", RemoveMemberView.as_view()),
+    path("my-invites/", MyInvitesView.as_view()),
+    path("invite/<int:invite_id>/cancel/", CancelInviteView.as_view()),
 ]

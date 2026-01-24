@@ -36,6 +36,12 @@ class ChangeRoleSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Membership.Role.choices)
 
 
+class MyInviteSerializer(serializers.ModelSerializer):
+    company_name = serializers.CharField(source="company.name", read_only=True)
+
+    class Meta:
+        model = Invite
+        fields = ["id", "company_name", "role", "status", "created_at"]
 
 
 

@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from apps.companies.models import Company, Membership, Invite
 from apps.companies.services.company_service import create_company
 from apps.companies.services.invite_service import (
-    send_invite, accept_invite, reject_invite, cancel_invite
+    send_invite, accept_invite, reject_invite, cancel_invite, list_user_invites
 )
 from apps.companies.services.membership_service import (
     change_member_role, remove_member
@@ -104,3 +104,18 @@ class RemoveMemberView(APIView):
         membership = get_object_or_404(Membership, id=membership_id)
         remove_member(membership=membership, removed_by=request.user)
         return Response(status=204)
+
+
+class MyInvitesView(APIView):
+    def get(self, request):
+        invites = list_user_invites(user=request.user)
+        return Response(MyInviteSerializer(invites, many=True).data)
+
+
+class CancelInviteView(APIView):
+    permission_classes = [IsCompanyAdmin]
+
+    def post(self, request, invite_id):
+        invite = get_object_or_404(Invite, id=invite_id)
+        cancel_invite(invite=invite, cancelled_by=request.user)
+        return Response({"detail": "Invite cancelled"})
