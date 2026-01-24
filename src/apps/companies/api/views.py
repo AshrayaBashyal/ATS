@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 
 from apps.companies.models import Company, Membership, Invite
 from apps.companies.services.company_service import create_company
@@ -103,8 +104,15 @@ class RemoveMemberView(APIView):
 
     def delete(self, request, membership_id):
         membership = get_object_or_404(Membership, id=membership_id)
-        remove_member(membership=membership, removed_by=request.user)
-        return Response(status=204)
+        try:
+            remove_member(membership=membership, removed_by=request.user)
+        except ValidationError as e:
+            # Return a clean JSON response with the error message
+            return Response(
+                {"detail": e.messages},  # e.messages is a list
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # class MyInvitesView(APIView):
