@@ -205,3 +205,28 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = True
 CELERY_RESULT_EXTENDED = True
+
+
+# SPECTACULAR_SETTINGS = {
+#     'TITLE': 'JobPortal API',
+#     'DESCRIPTION': 'ATS Modules project with JWT Authentication',
+#     'VERSION': '1.0.0',
+#     'SERVE_INCLUDE_SCHEMA': False,
+    
+#     # Separation of Request/Response components 
+#     'COMPONENT_SPLIT_REQUEST': True, 
+
+#     # This adds the "Authorize" button to Swagger for your JWT tokens
+#     'SECURITY': [{
+#         'jwtAuth': [],
+#     }],
+#     'APPEND_COMPONENTS': {
+#         'securitySchemes': {
+#             'jwtAuth': {
+#                 'type': 'http',
+#                 'scheme': 'bearer',
+#                 'bearerFormat': 'JWT',
+#             }
+#         }
+#     },
+# }
