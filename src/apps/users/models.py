@@ -112,7 +112,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
     
 
-@property
-def get_full_name(self):
-    parts = [self.first_name, self.middle_name, self.last_name]
-    return " ".join([p for p in parts if p])
+    @property
+    def get_full_name(self):
+        parts = [self.first_name, self.middle_name, self.last_name]
+        return " ".join([p for p in parts if p])
