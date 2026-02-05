@@ -9,6 +9,15 @@ import pyotp
 
 
 class UserManager(BaseUserManager):
+
+    def _clean_text(self, text):
+        """
+        Collapses multiple internal spaces into one and strips leading/trailing whitespace.
+        """
+        if text:
+            return " ".join(text.split())
+        return None
+    
     def create_user(
         self,
         email,
@@ -36,9 +45,9 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             email=email,
-            first_name=first_name.strip(),
-            middle_name=middle_name.strip() if middle_name else None,
-            last_name=last_name.strip(),
+            first_name=self._clean_text(first_name),
+            middle_name=self._clean_text(middle_name),
+            last_name=self._clean_text(last_name),
             dob=dob,
             **extra_fields,
         )
@@ -101,3 +110,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+
+@property
+def get_full_name(self):
+    parts = [self.first_name, self.middle_name, self.last_name]
+    return " ".join([p for p in parts if p])
