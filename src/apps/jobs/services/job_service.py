@@ -63,3 +63,27 @@ def change_job_status(*, job, status, changed_by):
     return job
 
 
+def delete_job(*, job, deleted_by):
+    """
+    Only Admin or Creator can delete jobs.
+    """
+
+    is_admin = Membership.objects.filter(
+        company=job.company, 
+        user=deleted_by, 
+        role=Membership.Role.ADMIN
+    ).exists()
+
+    is_creator = (job.created_by == deleted_by) 
+    
+    if not (is_admin or is_creator):
+        raise ValidationError("You do not have permission to delete this job.")
+
+    # TODO: Consider implementing "Soft Delete" in the future.
+    # Instead of job.delete(), we could set job.status = 'ARCHIVED'.
+    # This prevents losing candidate application data associated with this job.
+    job.delete() 
+
+
+
+
