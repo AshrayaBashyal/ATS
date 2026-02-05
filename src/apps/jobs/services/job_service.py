@@ -45,3 +45,21 @@ def update_job(*, job, data, updated_by):
     job.save()
     return job
 
+
+def change_job_status(*, job, status, changed_by):
+    """
+    Only Admin or Recruiter can change status.
+    """
+
+    if not Membership.objects.filter(
+        company=job.company,
+        user=changed_by,
+        role__in=[Membership.Role.ADMIN, Membership.Role.RECRUITER]
+    ).exists():
+        raise ValidationError("You cannot change job status.")
+
+    job.status = status
+    job.save(update_fields=["status"])
+    return job
+
+
