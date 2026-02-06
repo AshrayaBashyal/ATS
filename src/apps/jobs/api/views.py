@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 
 from apps.jobs.models import Job
@@ -53,3 +54,11 @@ class JobViewset(viewsets.ModelViewSet):
         delete_job(job=job, deleted_by=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+    @action(detail=True, methods=["post"])
+    def change_status(self, request, pk=None):
+        job = self.get_object()
+        status_value = request.data.get("status")
+
+        job = change_job_status(job=job, status=status_value, changed_by=request.user)
+        return Response(self.get_serializer(job).data)
