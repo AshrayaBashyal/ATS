@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from apps.jobs.models import Job
@@ -19,8 +20,14 @@ class JobViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Show jobs only from companies user belongs to
-        return Job.objects.filter(company__membership__user=self.request.user).select_related("company", "created_by")
+        user = self.request.user
+        # Logic: 
+        # 1. Show all jobs I created (including Drafts)
+        # 2. Show Open/Closed jobs from my companies (exclude Drafts)
+        return Job.objects.select_related("company", "created_by").filter(
+            Q(created_by=user) | 
+            (Q(company__memberships__user=user) & ~Q(status="DRAFT"))
+        ).distinct()
     
 
     def create(self, request, *args, **kwargs):
