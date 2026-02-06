@@ -36,3 +36,13 @@ class JobViewset(viewsets.ModelViewSet):
         )
 
         return Response(self.get_serializer(job).data, status=status.HTTP_201_CREATED)
+
+
+    def update(self, request, *args, **kwargs):
+        job = self.get_object()
+        serializer = self.get_serializer(job, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        job = update_job(job=job, data=serializer.validated_data, updated_by=request.user)
+
+        return Response(self.get_serializer(job).data)
