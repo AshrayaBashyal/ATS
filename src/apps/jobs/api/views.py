@@ -18,4 +18,21 @@ class JobViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # Show jobs only from companies user belongs to
         return Job.objects.filter(company__membership__user=self.request.user).select_related("company", "created_by")
+    
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        job = create_job(
+            company=serializer.validated_data["company"],
+            title=serializer.validated_data["title"],
+            description=serializer.validated_data["description"],
+            department=serializer.validated_data.get("department", ""),
+            location=serializer.validated_data.get("location", ""),
+            created_by=request.user,
+        )
+
+        return Response(self.get_serializer(job).data, status=status.HTTP_201_CREATED)
