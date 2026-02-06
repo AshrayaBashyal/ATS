@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -21,13 +21,27 @@ class JobViewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = Job.objects.select_related("company", "created_by")
         # Logic: 
         # 1. Show all jobs I created (including Drafts)
         # 2. Show Open/Closed jobs from my companies (exclude Drafts)
-        return Job.objects.select_related("company", "created_by").filter(
+        queryset =  queryset.filter(
             Q(created_by=user) | 
             (Q(company__memberships__user=user) & ~Q(status="DRAFT"))
         ).distinct()
+    
+        # Optional Toggle: /api/manage/jobs/?mine=true
+        show_only_mine = self.request.query_params.get('mine') == 'true'
+        if show_only_mine:
+            return queryset.filter(created_by=user)
+
+        # Optional Filter: Show specific status (?status=OPEN)
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            # 'open' or 'OPEN' both work
+            queryset = queryset.filter(status=status_param.upper())        
+
+        return queryset
     
 
     def create(self, request, *args, **kwargs):
@@ -69,3 +83,13 @@ class JobViewset(viewsets.ModelViewSet):
 
         job = change_job_status(job=job, status=status_value, changed_by=request.user)
         return Response(self.get_serializer(job).data)
+    
+
+class PublicJobViewset(viewsets.ReadOnlyModelViewSet):
+    """
+    Public Viewset for Candidates (and anyone else) to see all OPEN jobs.
+    """
+    serializer_class = JobSerializer
+    # IsAuthenticatedOrReadOnly so unauthenticated users can browse
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Job.objects.filter(status="OPEN").select_related("company", "created_by")
