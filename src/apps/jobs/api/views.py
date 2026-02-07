@@ -103,4 +103,4 @@ class PublicJobViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = JobSerializer
     # IsAuthenticatedOrReadOnly so unauthenticated users can browse
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Job.objects.filter(status="OPEN").select_related("company", "created_by")
+    queryset = Job.objects.filter(status__iexact="open").select_related("company", "created_by")
