@@ -13,11 +13,22 @@ from apps.jobs.services.job_service import (
     delete_job,
     change_job_status,
 )
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 class JobViewset(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='mine', description='Filter: Only my jobs', type=bool),
+            OpenApiParameter(name='status', description='Filter: Job status', type=str),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
     def get_queryset(self):
         user = self.request.user
@@ -27,19 +38,19 @@ class JobViewset(viewsets.ModelViewSet):
         # 2. Show Open/Closed jobs from my companies (exclude Drafts)
         queryset =  queryset.filter(
             Q(created_by=user) | 
-            (Q(company__memberships__user=user) & ~Q(status="DRAFT"))
+            (Q(company__memberships__user=user) & ~Q(status__iexact="draft"))
         ).distinct()
     
         # Optional Toggle: /api/manage/jobs/?mine=true
         show_only_mine = self.request.query_params.get('mine') == 'true'
         if show_only_mine:
-            return queryset.filter(created_by=user)
+            queryset = queryset.filter(created_by=user)
 
         # Optional Filter: Show specific status (?status=OPEN)
         status_param = self.request.query_params.get('status')
         if status_param:
             # 'open' or 'OPEN' both work
-            queryset = queryset.filter(status=status_param.upper())        
+            queryset = queryset.filter(status__iexact=status_param)        
 
         return queryset
     
