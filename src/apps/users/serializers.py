@@ -26,13 +26,31 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = fields  # Everything is read-only for safety
 
 
+# class RegisterSerializer(serializers.ModelSerializer):
+#     """Serializer for registering new users"""
+#     password = serializers.CharField(write_only=True, validators=[validate_password])
+
+#     class Meta:
+#         model = User
+#         fields = ["email", "password", "first_name", "middle_name", "last_name", "dob"]
+
+
+
+
 class RegisterSerializer(serializers.ModelSerializer):
-    """Serializer for registering new users"""
-    password = serializers.CharField(write_only=True, validators=[validate_password])
+    """TEMP: Simplified registration for fast testing"""
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ["email", "password", "first_name", "middle_name", "last_name", "dob"]
+        fields = ["email", "password", "first_name", "last_name"]
+
+    def create(self, validated_data):
+        # Directly creates user and hashes password
+        return User.objects.create_user(is_verified=True, **validated_data)
+
+
+
 
     def validate_dob(self, value):
         today = date.today()

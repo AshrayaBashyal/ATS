@@ -22,24 +22,37 @@ from apps.otp.tasks import send_otp_email_task
 
 
 
+# class RegisterView(generics.CreateAPIView):
+#     serializer_class = RegisterSerializer
+#     permission_classes = [AllowAny]
+
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         user = serializer.save()
+
+#         # Send verification OTP
+#         send_otp_email_task.delay(user.id, purpose="verify")
+
+#         return Response(
+#             {"msg": "User registered. Check your email for OTP verification."},
+#             status=status.HTTP_201_CREATED,
+#         )
+    
+
+
+
 class RegisterView(generics.CreateAPIView):
+    """TEMP: Simple registration view without OTP/Email logic"""
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+    # No custom 'create' method needed. 
+    # DRF's default create() will call serializer.save() 
+    # and return a 201 Created response automatically.
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        user = serializer.save()
 
-        # Send verification OTP
-        send_otp_email_task.delay(user.id, purpose="verify")
-
-        return Response(
-            {"msg": "User registered. Check your email for OTP verification."},
-            status=status.HTTP_201_CREATED,
-        )
-    
 
 class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
