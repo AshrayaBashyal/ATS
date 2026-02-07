@@ -22,36 +22,24 @@ from apps.otp.tasks import send_otp_email_task
 
 
 
-# class RegisterView(generics.CreateAPIView):
-#     serializer_class = RegisterSerializer
-#     permission_classes = [AllowAny]
-
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-
-#         user = serializer.save()
-
-#         # Send verification OTP
-#         send_otp_email_task.delay(user.id, purpose="verify")
-
-#         return Response(
-#             {"msg": "User registered. Check your email for OTP verification."},
-#             status=status.HTTP_201_CREATED,
-#         )
-    
-
-
-
 class RegisterView(generics.CreateAPIView):
-    """TEMP: Simple registration view without OTP/Email logic"""
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
-    # No custom 'create' method needed. 
-    # DRF's default create() will call serializer.save() 
-    # and return a 201 Created response automatically.
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        user = serializer.save()
+
+        # TEMP: Commented out to avoid waiting for email tasks
+        # ____________Send verification OTP_______________
+        # send_otp_email_task.delay(user.id, purpose="verify")
+
+        return Response(
+            {"msg": "User registered. Check your email for OTP verification."},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class UserListView(generics.ListAPIView):
@@ -106,11 +94,11 @@ class LoginView(generics.GenericAPIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        if not user.is_verified:
-            return Response(
-                {"error": "Email not verified"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        # if not user.is_verified:
+        #     return Response(
+        #         {"error": "Email not verified"},
+        #         status=status.HTTP_403_FORBIDDEN,
+        #     )
 
         refresh = RefreshToken.for_user(user)
 

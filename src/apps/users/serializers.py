@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import User
 from django.contrib.auth.password_validation import validate_password
 from datetime import date
-from apps.companies.models import Membership  # your Membership model
+from apps.companies.models import Membership  
 
 
 
@@ -26,31 +26,13 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = fields  # Everything is read-only for safety
 
 
-# class RegisterSerializer(serializers.ModelSerializer):
-#     """Serializer for registering new users"""
-#     password = serializers.CharField(write_only=True, validators=[validate_password])
-
-#     class Meta:
-#         model = User
-#         fields = ["email", "password", "first_name", "middle_name", "last_name", "dob"]
-
-
-
-
 class RegisterSerializer(serializers.ModelSerializer):
-    """TEMP: Simplified registration for fast testing"""
-    password = serializers.CharField(write_only=True)
+    """Serializer for registering new users"""
+    password = serializers.CharField(write_only=True, validators=[validate_password])
 
     class Meta:
         model = User
-        fields = ["email", "password", "first_name", "last_name", "dob"]
-
-    def create(self, validated_data):
-        # Directly creates user and hashes password
-        return User.objects.create_user(is_verified=True, **validated_data)
-
-
-
+        fields = ["email", "password", "first_name", "middle_name", "last_name", "dob"]
 
     def validate_dob(self, value):
         today = date.today()
