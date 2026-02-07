@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # --------------------------------------------------
 # Paths & environment
@@ -166,6 +167,22 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"
 }
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MINUTES", 100))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.getenv("REFRESH_TOKEN_LIFETIME_DAYS", 7))
+    ),
+    "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY", "fallback-insecure-key"),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    # Other defaults
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+}
+
 
 # --------------------------------------------------
 # CORS (separate frontend)
