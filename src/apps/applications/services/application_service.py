@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from apps.applications.models import Application
 from apps.companies.models import Membership
 from apps.jobs.models import Job
+from django.db.models import Q
 
 
 ALLOWED_STATUS_TRANSITIONS = {
@@ -82,3 +83,23 @@ def change_application_status(*, application, status, changed_by):
     application.save(update_fields=["status"])
 
     return application
+
+
+def get_applications_for_user(*, user):
+    """
+    Returns:
+    - Applications the user submitted (candidate)
+    - Applications the user manages (recruiter/admin)
+    """
+
+    query = Q(candidate=user)
+
+    if Membership.objects.filter(user=user).exists():
+        query |= Q(job__company__memberships__user=user)
+
+    return (
+        Application.objects
+        .filter(query)
+        .select_related("job__company", "candidate")
+        .distinct()
+    )
