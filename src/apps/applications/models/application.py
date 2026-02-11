@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from apps.jobs.models import Job
 
 
@@ -31,8 +32,21 @@ class Application(models.Model):
         default=Status.APPLIED
     )
 
-    resume = models.FileField(upload_to="resumes/", blank=False, null=False)
-    cover_letter = models.FileField(upload_to="cover_letters/", blank=True, null=True)
+    resume = models.FileField(
+        upload_to="resumes/", 
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'txt'])],
+        blank=False, 
+        null=False,
+        help_text="Required: PDF or Word format."
+    )
+    
+    cover_letter = models.FileField(
+        upload_to="cover_letters/", 
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'docx', 'doc', 'txt'])],
+        blank=True, 
+        null=True,
+        help_text="Optional: PDF or Word format."
+    )
 
 
     class Meta:
