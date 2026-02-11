@@ -25,3 +25,20 @@ def apply_to_job(*, job, candidate, resume=None, cover_letter=None):
     )
 
     return application
+
+
+def change_application_status(*, application, status, changed_by):
+    """
+    Only Admin or Recruiter can change status.
+    """
+
+    if not Membership.objects.filter(
+        company=application.job.company,
+        user=changed_by,
+        role__in=[Membership.Role.ADMIN, Membership.Role.RECRUITER]
+    ).exists():
+        raise ValidationError("You do not have permission to update application status.")
+
+    application.status = status
+    application.save(update_fields=["status"])
+    return application
