@@ -24,28 +24,24 @@ def send_email(to_email: str, subject: str, body: str, from_email: str = None):
     )
 
 
-
-
-
 def send_application_status_email(*, application, to_status):
     """
     Sends candidate-facing emails for certain application statuses.
     """
 
-    candidate = application.candidate
-    job = application.job
-    company = job.company
-
-    # Only certain statuses trigger emails
     TEMPLATE_MAP = {
-        "INTERVIEW": "templates/applications/interview_email.txt",
-        "REJECTED": "templates/applications/rejection_email.txt",
-        "HIRED": "templates/applications/hired_email.txt",
+        "INTERVIEW": "applications/interview_email.txt",
+        "REJECTED": "applications/rejection_email.txt",
+        "HIRED": "applications/hired_email.txt",
     }
 
     template = TEMPLATE_MAP.get(to_status)
     if not template:
-        return  # Silent no-op (important)
+        return  # No email for this status
+
+    candidate = application.candidate
+    job = application.job
+    company = job.company
 
     context = {
         "candidate_name": candidate.get_full_name() or candidate.email,
@@ -55,10 +51,8 @@ def send_application_status_email(*, application, to_status):
 
     body = render_to_string(template, context)
 
-    send_mail(
+    send_email(
+        to_email=candidate.email,
         subject=f"Update on your application for {job.title}",
-        message=body,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[candidate.email],
-        fail_silently=False,
+        body=body,
     )
