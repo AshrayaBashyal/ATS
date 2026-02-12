@@ -3,6 +3,12 @@ from apps.applications.models import Application
 from apps.companies.models import Membership
 from apps.jobs.models import Job
 from django.db.models import Q
+from apps.emails.services import (
+    send_application_status_email,
+)
+from apps.emails.tasks import (
+    send_application_status_email_task,
+)
 
 
 ALLOWED_STATUS_TRANSITIONS = {
@@ -81,6 +87,20 @@ def change_application_status(*, application, status, changed_by):
 
     application.status = status
     application.save(update_fields=["status"])
+
+    # Email trigger (AFTER commit) - Sync for now
+    send_application_status_email(
+        application=application,
+        to_status=status,
+    )
+
+    # ___Email Task with celery -- all set just uncomment___
+    # send_application_status_email_task.delay(
+    #     application_id=application.id,
+    #     to_status=status,
+    # )
+
+
 
     return application
 
