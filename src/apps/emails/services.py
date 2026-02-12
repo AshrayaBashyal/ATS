@@ -38,9 +38,9 @@ def send_application_status_email(*, application, to_status):
 
     # Only certain statuses trigger emails
     TEMPLATE_MAP = {
-        "INTERVIEW": "applications/interview_email.txt",
-        "REJECTED": "applications/rejection_email.txt",
-        "HIRED": "applications/hired_email.txt",
+        "INTERVIEW": "templates/applications/interview_email.txt",
+        "REJECTED": "templates/applications/rejection_email.txt",
+        "HIRED": "templates/applications/hired_email.txt",
     }
 
     template = TEMPLATE_MAP.get(to_status)
