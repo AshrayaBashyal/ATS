@@ -1,0 +1,11 @@
+Hi {{ candidate_name }},
+
+Good news 🎉
+
+You’ve been selected for an interview for the role of
+{{ job_title }} at {{ company_name }}.
+
+We’ll reach out shortly with the next steps.
+
+Best,
+{{ company_name }} Hiring Team
