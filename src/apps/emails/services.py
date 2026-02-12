@@ -1,5 +1,7 @@
 from django.core.mail import send_mail
 from django.conf import settings
+from django.template.loader import render_to_string
+
 
 def send_email(to_email: str, subject: str, body: str, from_email: str = None):
     """
@@ -19,4 +21,44 @@ def send_email(to_email: str, subject: str, body: str, from_email: str = None):
         from_email=from_email,
         recipient_list=[to_email],
         fail_silently=False,  # Raise errors in development; can set True in prod if needed
+    )
+
+
+
+
+
+def send_application_status_email(*, application, to_status):
+    """
+    Sends candidate-facing emails for certain application statuses.
+    """
+
+    candidate = application.candidate
+    job = application.job
+    company = job.company
+
+    # Only certain statuses trigger emails
+    TEMPLATE_MAP = {
+        "INTERVIEW": "applications/interview_email.txt",
+        "REJECTED": "applications/rejection_email.txt",
+        "HIRED": "applications/hired_email.txt",
+    }
+
+    template = TEMPLATE_MAP.get(to_status)
+    if not template:
+        return  # Silent no-op (important)
+
+    context = {
+        "candidate_name": candidate.get_full_name() or candidate.email,
+        "job_title": job.title,
+        "company_name": company.name,
+    }
+
+    body = render_to_string(template, context)
+
+    send_mail(
+        subject=f"Update on your application for {job.title}",
+        message=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[candidate.email],
+        fail_silently=False,
     )
