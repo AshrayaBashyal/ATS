@@ -45,3 +45,24 @@ class ApplicationViewset(viewsets.GenericViewSet):
 
         serializer = self.get_serializer(application)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+    @action(detail=True, methods=["post"])
+    def change_status(self, request, pk=None):
+        application = self.get_object()
+        serializer = ChangeStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            application = change_application_status(
+                application=application,
+                status=serializer.validated_data["status"],
+                changed_by=request.user,
+            )
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=400)
+
+        return Response(
+            self.get_serializer(application).data,
+            status=status.HTTP_200_OK,
+        )
