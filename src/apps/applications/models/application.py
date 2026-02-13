@@ -48,6 +48,9 @@ class Application(models.Model):
         help_text="Optional: PDF or Word format."
     )
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
     class Meta:
         unique_together = ["job", "candidate"]

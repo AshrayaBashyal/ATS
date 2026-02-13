@@ -19,7 +19,7 @@ from apps.applications.api.serializers import (
 from apps.jobs.models import Job
 
 
-class ApplicationViewset(viewsets.GenericViewSet):
+class ApplicationViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = ApplicationSerializer
 
