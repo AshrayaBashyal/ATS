@@ -56,6 +56,7 @@ def apply_to_job(*, job, candidate, resume=None, cover_letter=None):
     return application
 
 
+# TODO:(Utilize ApplicationAssignment Moodel) replace company-wide visibility with JobAssignment: any recruiter in a company can change status of all applications.
 def change_application_status(*, application, status, changed_by):
     """
     Only Admin or Recruiter can change status.
@@ -105,6 +106,7 @@ def change_application_status(*, application, status, changed_by):
     return application
 
 
+# TODO: (Utilize ApplicationAssignment Model)replace company-wide visibility with JobAssignment: any recruiter in a company can see all applications for now.
 def get_applications_for_user(*, user):
     """
     Returns:
