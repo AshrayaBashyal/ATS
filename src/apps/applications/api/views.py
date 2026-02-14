@@ -18,17 +18,39 @@ from apps.applications.api.serializers import (
 )
 from apps.jobs.models import Job
 
+from drf_spectacular.utils import extend_schema
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
 
 class ApplicationViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
+    queryset = Application.objects.all() # MUST add this to fix the 'id' warning
     serializer_class = ApplicationSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
 
     def get_queryset(self):
         return get_applications_for_user(user=self.request.user)
 
-    
-    @action(detail=False, methods=["post"])
+
+    @extend_schema(
+        operation_id="apply_to_job",
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'job': {'type': 'integer'},
+                    'resume': {'type': 'string', 'format': 'binary'}, # This triggers the upload button
+                    'cover_letter': {'type': 'string', 'format': 'binary'},
+                },
+                'required': ['job', 'resume'], # Tells Swagger 'resume' is a mandatory file
+            },
+        },
+        responses={201: ApplicationSerializer}
+    )
+
+
+    @action(detail=False, methods=["post"], parser_classes = [MultiPartParser, FormParser])
     def apply(self, request):
         job_id = request.data.get("job")
         job = get_object_or_404(Job, id=job_id)
@@ -38,7 +60,7 @@ class ApplicationViewSet(viewsets.GenericViewSet):
                 job=job,
                 candidate=request.user,
                 resume=request.FILES.get("resume"),
-                cover_letter=request.data.get("cover_letter"),
+                cover_letter=request.FILES.get("cover_letter"),
             )
         except ValidationError as e:
             return Response({"detail": str(e)}, status=400)
@@ -47,7 +69,8 @@ class ApplicationViewSet(viewsets.GenericViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-    @action(detail=True, methods=["post"])
+    @extend_schema(request=ChangeStatusSerializer)
+    @action(detail=True, methods=["post"], parser_classes=[JSONParser])
     def change_status(self, request, pk=None):
         application = self.get_object()
         serializer = ChangeStatusSerializer(data=request.data)
